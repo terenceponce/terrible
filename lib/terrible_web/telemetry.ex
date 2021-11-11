@@ -1,4 +1,8 @@
 defmodule TerribleWeb.Telemetry do
+  @moduledoc """
+  Telemetry things go here.
+  """
+
   use Supervisor
   import Telemetry.Metrics
 
