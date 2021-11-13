@@ -29,7 +29,7 @@
           "apps/*/lib/",
           "apps/*/src/",
           "apps/*/test/",
-          "apps/*/web/",
+          "apps/*/web/"
         ],
         excluded: [
           ~r"/_build/",
