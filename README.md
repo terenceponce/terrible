@@ -1,5 +1,8 @@
 # Terrible
 
+[![gh-actions](https://github.com/terenceponce/terrible/workflows/Continuous%20Integration/badge.svg)](https://github.com/terenceponce/terrible/actions?workflow=Continuous+Integration)
+[![Coverage Status](https://coveralls.io/repos/github/terenceponce/terrible/badge.svg?branch=main)](https://coveralls.io/github/terenceponce/terrible?branch=main)
+
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`
