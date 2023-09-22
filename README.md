@@ -1,6 +1,7 @@
 # Terrible
 
 [![gh-actions](https://github.com/terenceponce/terrible/workflows/Continuous%20Integration/badge.svg)](https://github.com/terenceponce/terrible/actions?workflow=Continuous+Integration)
+[![codecov](https://codecov.io/gh/terenceponce/terrible/graph/badge.svg?token=671ABMG7lb)](https://codecov.io/gh/terenceponce/terrible)
 
 To start your Phoenix server:
 
