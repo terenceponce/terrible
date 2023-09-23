@@ -1,4 +1,6 @@
 defmodule TerribleWeb.UserAuth do
+  @moduledoc false
+
   use TerribleWeb, :verified_routes
 
   import Plug.Conn

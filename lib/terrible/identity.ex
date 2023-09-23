@@ -6,7 +6,7 @@ defmodule Terrible.Identity do
   import Ecto.Query, warn: false
   alias Terrible.Repo
 
-  alias Terrible.Identity.{User, UserToken, UserNotifier}
+  alias Terrible.Identity.{User, UserNotifier, UserToken}
 
   ## Database getters
 

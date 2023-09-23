@@ -1,4 +1,6 @@
 defmodule Terrible.Identity.UserToken do
+  @moduledoc false
+
   use Ecto.Schema
   import Ecto.Query
   alias Terrible.Identity.UserToken

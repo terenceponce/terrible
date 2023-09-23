@@ -1,4 +1,6 @@
 defmodule Terrible.Identity.UserNotifier do
+  @moduledoc false
+
   import Swoosh.Email
 
   alias Terrible.Mailer
