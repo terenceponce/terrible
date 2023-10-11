@@ -3,6 +3,7 @@ defmodule TerribleWeb.UserForgotPasswordLive do
 
   alias Terrible.Identity
 
+  @spec render(Phoenix.LiveView.Socket.assigns()) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-sm">
