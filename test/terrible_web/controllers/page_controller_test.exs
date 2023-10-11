@@ -1,5 +1,5 @@
 defmodule TerribleWeb.PageControllerTest do
-  use TerribleWeb.ConnCase
+  use TerribleWeb.ConnCase, async: true
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")

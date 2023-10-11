@@ -1,10 +1,11 @@
 defmodule Terrible.IdentityTest do
-  use Terrible.DataCase
-
-  alias Terrible.Identity
+  use Terrible.DataCase, async: true
 
   import Terrible.IdentityFixtures
-  alias Terrible.Identity.{User, UserToken}
+
+  alias Terrible.Identity
+  alias Terrible.Identity.User
+  alias Terrible.Identity.UserToken
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
@@ -86,7 +87,12 @@ defmodule Terrible.IdentityTest do
 
     test "registers users with a hashed password" do
       email = unique_user_email()
-      {:ok, user} = Identity.register_user(valid_user_attributes(email: email))
+
+      {:ok, user} =
+        %{email: email}
+        |> valid_user_attributes()
+        |> Identity.register_user()
+
       assert user.email == email
       assert is_binary(user.hashed_password)
       assert is_nil(user.confirmed_at)
@@ -299,9 +305,9 @@ defmodule Terrible.IdentityTest do
     end
 
     test "deletes all tokens for the given user", %{user: user} do
-      _ = Identity.generate_user_session_token(user)
+      _token = Identity.generate_user_session_token(user)
 
-      {:ok, _} =
+      {:ok, _user} =
         Identity.update_user_password(user, valid_user_password(), %{
           password: "new valid password"
         })
@@ -494,8 +500,8 @@ defmodule Terrible.IdentityTest do
     end
 
     test "deletes all tokens for the given user", %{user: user} do
-      _ = Identity.generate_user_session_token(user)
-      {:ok, _} = Identity.reset_user_password(user, %{password: "new valid password"})
+      _token = Identity.generate_user_session_token(user)
+      {:ok, _user} = Identity.reset_user_password(user, %{password: "new valid password"})
       refute Repo.get_by(UserToken, user_id: user.id)
     end
   end

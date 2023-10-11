@@ -4,9 +4,11 @@ defmodule Terrible.Identity do
   """
 
   import Ecto.Query, warn: false
-  alias Terrible.Repo
 
-  alias Terrible.Identity.{User, UserNotifier, UserToken}
+  alias Terrible.Identity.User
+  alias Terrible.Identity.UserNotifier
+  alias Terrible.Identity.UserToken
+  alias Terrible.Repo
 
   ## Database getters
 
@@ -148,10 +150,13 @@ defmodule Terrible.Identity do
 
     with {:ok, query} <- UserToken.verify_change_email_token_query(token, context),
          %UserToken{sent_to: email} <- Repo.one(query),
-         {:ok, _} <- Repo.transaction(user_email_multi(user, email, context)) do
+         {:ok, _} <-
+           user
+           |> user_email_multi(email, context)
+           |> Repo.transaction() do
       :ok
     else
-      _ -> :error
+      _any -> :error
     end
   end
 
@@ -228,7 +233,7 @@ defmodule Terrible.Identity do
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
+      {:error, :user, changeset, _multi_name} -> {:error, changeset}
     end
   end
 
@@ -258,7 +263,10 @@ defmodule Terrible.Identity do
   """
   @spec delete_user_session_token(binary()) :: :ok
   def delete_user_session_token(token) do
-    Repo.delete_all(UserToken.token_and_context_query(token, "session"))
+    token
+    |> UserToken.token_and_context_query("session")
+    |> Repo.delete_all()
+
     :ok
   end
 
@@ -301,10 +309,13 @@ defmodule Terrible.Identity do
   def confirm_user(token) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "confirm"),
          %User{} = user <- Repo.one(query),
-         {:ok, %{user: user}} <- Repo.transaction(confirm_user_multi(user)) do
+         {:ok, %{user: user}} <-
+           user
+           |> confirm_user_multi()
+           |> Repo.transaction() do
       {:ok, user}
     else
-      _ -> :error
+      _any -> :error
     end
   end
 
@@ -354,7 +365,7 @@ defmodule Terrible.Identity do
          %User{} = user <- Repo.one(query) do
       user
     else
-      _ -> nil
+      _any -> nil
     end
   end
 
@@ -379,7 +390,7 @@ defmodule Terrible.Identity do
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
+      {:error, :user, changeset, _multi_name} -> {:error, changeset}
     end
   end
 end

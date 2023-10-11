@@ -18,10 +18,10 @@ defmodule Terrible.Identity.UserToken do
   @type t :: %__MODULE__{
           __meta__: Ecto.Schema.Metadata.t(),
           id: integer() | nil,
-          token: binary(),
-          context: String.t(),
-          sent_to: String.t(),
-          user_id: integer(),
+          token: binary() | nil,
+          context: String.t() | nil,
+          sent_to: String.t() | nil,
+          user_id: integer() | nil,
           inserted_at: NaiveDateTime.t() | nil
         }
 
@@ -53,7 +53,7 @@ defmodule Terrible.Identity.UserToken do
   and devices in the UI and allow users to explicitly expire any
   session they deem invalid.
   """
-  # credo:disable-for-next-line Credo.Check.Readability.Specs
+  @spec build_session_token(Terrible.Identity.User.t()) :: {binary(), UserToken.t()}
   def build_session_token(user) do
     token = :crypto.strong_rand_bytes(@rand_size)
     {token, %UserToken{token: token, context: "session", user_id: user.id}}
@@ -160,7 +160,7 @@ defmodule Terrible.Identity.UserToken do
   The context must always start with "change:".
   """
   @spec verify_change_email_token_query(binary(), String.t()) :: {:ok, Ecto.Query.t()} | :error
-  def verify_change_email_token_query(token, "change:" <> _ = context) do
+  def verify_change_email_token_query(token, "change:" <> _type = context) do
     case Base.url_decode64(token, padding: false) do
       {:ok, decoded_token} ->
         hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
