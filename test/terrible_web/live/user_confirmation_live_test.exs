@@ -1,5 +1,5 @@
 defmodule TerribleWeb.UserConfirmationLiveTest do
-  use TerribleWeb.ConnCase
+  use TerribleWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
   import Terrible.IdentityFixtures

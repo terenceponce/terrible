@@ -1,9 +1,10 @@
 defmodule TerribleWeb.UserSettingsLiveTest do
-  use TerribleWeb.ConnCase
+  use TerribleWeb.ConnCase, async: true
 
-  alias Terrible.Identity
   import Phoenix.LiveViewTest
   import Terrible.IdentityFixtures
+
+  alias Terrible.Identity
 
   describe "Settings page" do
     test "renders settings page", %{conn: conn} do

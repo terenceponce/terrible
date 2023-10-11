@@ -142,6 +142,7 @@ defmodule Terrible.Identity.User do
   """
   @spec confirm_changeset(Ecto.Schema.t()) :: Ecto.Schema.t()
   def confirm_changeset(user) do
+    # credo:disable-for-next-line Credo.Check.Readability.SinglePipe
     now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
     change(user, confirmed_at: now)
   end
@@ -158,7 +159,7 @@ defmodule Terrible.Identity.User do
     Bcrypt.verify_pass(password, hashed_password)
   end
 
-  def valid_password?(_, _) do
+  def valid_password?(_any, _thing) do
     Bcrypt.no_user_verify()
     false
   end

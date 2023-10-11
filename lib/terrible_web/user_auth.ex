@@ -224,6 +224,7 @@ defmodule TerribleWeb.UserAuth do
   defp put_token_in_session(conn, token) do
     conn
     |> put_session(:user_token, token)
+    # credo:disable-for-next-line Credo.Check.Readability.NestedFunctionCalls
     |> put_session(:live_socket_id, "users_sessions:#{Base.url_encode64(token)}")
   end
 

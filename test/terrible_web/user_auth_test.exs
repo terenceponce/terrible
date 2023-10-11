@@ -1,10 +1,11 @@
 defmodule TerribleWeb.UserAuthTest do
   use TerribleWeb.ConnCase, async: true
 
+  import Terrible.IdentityFixtures
+
   alias Phoenix.LiveView
   alias Terrible.Identity
   alias TerribleWeb.UserAuth
-  import Terrible.IdentityFixtures
 
   @remember_me_cookie "_terrible_web_user_remember_me"
 
@@ -21,7 +22,8 @@ defmodule TerribleWeb.UserAuthTest do
     test "stores the user token in the session", %{conn: conn, user: user} do
       conn = UserAuth.log_in_user(conn, user)
       assert token = get_session(conn, :user_token)
-      assert get_session(conn, :live_socket_id) == "users_sessions:#{Base.url_encode64(token)}"
+      encoded_token = Base.url_encode64(token)
+      assert get_session(conn, :live_socket_id) == "users_sessions:#{encoded_token}"
       assert redirected_to(conn) == ~p"/"
       assert Identity.get_user_by_session_token(token)
     end
@@ -95,6 +97,7 @@ defmodule TerribleWeb.UserAuthTest do
         conn |> fetch_cookies() |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
 
       user_token = logged_in_conn.cookies[@remember_me_cookie]
+      encoded_user_token = Base.url_encode64(user_token)
       %{value: signed_token} = logged_in_conn.resp_cookies[@remember_me_cookie]
 
       conn =
@@ -106,11 +109,11 @@ defmodule TerribleWeb.UserAuthTest do
       assert get_session(conn, :user_token) == user_token
 
       assert get_session(conn, :live_socket_id) ==
-               "users_sessions:#{Base.url_encode64(user_token)}"
+               "users_sessions:#{encoded_user_token}"
     end
 
     test "does not authenticate if data is missing", %{conn: conn, user: user} do
-      _ = Identity.generate_user_session_token(user)
+      _token = Identity.generate_user_session_token(user)
       conn = UserAuth.fetch_current_user(conn, [])
       refute get_session(conn, :user_token)
       refute conn.assigns.current_user
@@ -139,7 +142,7 @@ defmodule TerribleWeb.UserAuthTest do
     end
 
     test "assigns nil to current_user assign if there isn't a user_token", %{conn: conn} do
-      session = conn |> get_session()
+      session = get_session(conn)
 
       {:cont, updated_socket} =
         UserAuth.on_mount(:mount_current_user, %{}, session, %LiveView.Socket{})
@@ -173,7 +176,7 @@ defmodule TerribleWeb.UserAuthTest do
     end
 
     test "redirects to login page if there isn't a user_token", %{conn: conn} do
-      session = conn |> get_session()
+      session = get_session(conn)
 
       socket = %LiveView.Socket{
         endpoint: TerribleWeb.Endpoint,
@@ -200,7 +203,7 @@ defmodule TerribleWeb.UserAuthTest do
     end
 
     test "doesn't redirect if there is no authenticated user", %{conn: conn} do
-      session = conn |> get_session()
+      session = get_session(conn)
 
       assert {:cont, _updated_socket} =
                UserAuth.on_mount(
