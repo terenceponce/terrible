@@ -34,7 +34,9 @@
         excluded: [
           ~r"/_build/",
           ~r"/deps/",
+          ~r"/lib/terrible_web.ex",
           ~r"/lib/terrible_web/components/core_components.ex",
+          ~r"/lib/terrible_web/telemetry.ex",
           ~r"/node_modules/",
           ~r"/test/support"
         ]
@@ -115,6 +117,13 @@
           {Credo.Check.Readability.RedundantBlankLines, []},
           {Credo.Check.Readability.Semicolons, []},
           {Credo.Check.Readability.SpaceAfterCommas, []},
+          {Credo.Check.Readability.Specs,
+           files: %{
+             excluded: [
+               ~r"/lib/terrible_web/controllers/",
+               ~r"/lib/terrible_web/live/"
+             ]
+           }},
           {Credo.Check.Readability.StringSigils, []},
           {Credo.Check.Readability.TrailingBlankLine, []},
           {Credo.Check.Readability.TrailingWhiteSpace, []},
@@ -188,7 +197,6 @@
           {Credo.Check.Readability.SeparateAliasRequire, []},
           {Credo.Check.Readability.SingleFunctionToBlockPipe, []},
           {Credo.Check.Readability.SinglePipe, []},
-          {Credo.Check.Readability.Specs, []},
           {Credo.Check.Readability.StrictModuleLayout, []},
           {Credo.Check.Readability.WithCustomTaggedTuple, []},
           {Credo.Check.Readability.OnePipePerLine, []},

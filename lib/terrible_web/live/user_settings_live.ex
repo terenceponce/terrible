@@ -3,6 +3,7 @@ defmodule TerribleWeb.UserSettingsLive do
 
   alias Terrible.Identity
 
+  @spec render(Phoenix.LiveView.Socket.assigns()) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
     ~H"""
     <.header class="text-center">

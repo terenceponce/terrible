@@ -3,6 +3,7 @@ defmodule TerribleWeb.UserConfirmationLive do
 
   alias Terrible.Identity
 
+  @spec render(Phoenix.LiveView.Socket.assigns()) :: Phoenix.LiveView.Rendered.t()
   def render(%{live_action: :edit} = assigns) do
     ~H"""
     <div class="mx-auto max-w-sm">

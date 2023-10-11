@@ -15,6 +15,16 @@ defmodule Terrible.Identity.UserToken do
   @change_email_validity_in_days 7
   @session_validity_in_days 60
 
+  @type t :: %__MODULE__{
+          __meta__: Ecto.Schema.Metadata.t(),
+          id: integer() | nil,
+          token: binary(),
+          context: String.t(),
+          sent_to: String.t(),
+          user_id: integer(),
+          inserted_at: NaiveDateTime.t() | nil
+        }
+
   schema "users_tokens" do
     field :token, :binary
     field :context, :string
@@ -43,6 +53,7 @@ defmodule Terrible.Identity.UserToken do
   and devices in the UI and allow users to explicitly expire any
   session they deem invalid.
   """
+  # credo:disable-for-next-line Credo.Check.Readability.Specs
   def build_session_token(user) do
     token = :crypto.strong_rand_bytes(@rand_size)
     {token, %UserToken{token: token, context: "session", user_id: user.id}}
@@ -56,6 +67,7 @@ defmodule Terrible.Identity.UserToken do
   The token is valid if it matches the value in the database and it has
   not expired (after @session_validity_in_days).
   """
+  @spec verify_session_token_query(binary()) :: {:ok, Ecto.Query.t()}
   def verify_session_token_query(token) do
     query =
       from token in token_and_context_query(token, "session"),
@@ -79,6 +91,7 @@ defmodule Terrible.Identity.UserToken do
   Users can easily adapt the existing code to provide other types of delivery methods,
   for example, by phone numbers.
   """
+  @spec build_email_token(Terrible.Identity.User.t(), String.t()) :: {String.t(), t()}
   def build_email_token(user, context) do
     build_hashed_token(user, context, user.email)
   end
@@ -109,6 +122,7 @@ defmodule Terrible.Identity.UserToken do
   for resetting the password. For verifying requests to change the email,
   see `verify_change_email_token_query/2`.
   """
+  @spec verify_email_token_query(binary(), String.t()) :: {:ok, Ecto.Query.t()} | :error
   def verify_email_token_query(token, context) do
     case Base.url_decode64(token, padding: false) do
       {:ok, decoded_token} ->
@@ -145,6 +159,7 @@ defmodule Terrible.Identity.UserToken do
   database and if it has not expired (after @change_email_validity_in_days).
   The context must always start with "change:".
   """
+  @spec verify_change_email_token_query(binary(), String.t()) :: {:ok, Ecto.Query.t()} | :error
   def verify_change_email_token_query(token, "change:" <> _ = context) do
     case Base.url_decode64(token, padding: false) do
       {:ok, decoded_token} ->
@@ -164,6 +179,7 @@ defmodule Terrible.Identity.UserToken do
   @doc """
   Returns the token struct for the given token value and context.
   """
+  @spec token_and_context_query(binary(), String.t()) :: Ecto.Query.t()
   def token_and_context_query(token, context) do
     from UserToken, where: [token: ^token, context: ^context]
   end
@@ -171,10 +187,12 @@ defmodule Terrible.Identity.UserToken do
   @doc """
   Gets all tokens for the given user for the given contexts.
   """
+  @spec user_and_contexts_query(Terrible.Identity.User.t(), [atom()]) :: Ecto.Query.t()
   def user_and_contexts_query(user, :all) do
     from t in UserToken, where: t.user_id == ^user.id
   end
 
+  @spec user_and_contexts_query(Terrible.Identity.User.t(), [atom()]) :: Ecto.Query.t()
   def user_and_contexts_query(user, [_ | _] = contexts) do
     from t in UserToken, where: t.user_id == ^user.id and t.context in ^contexts
   end

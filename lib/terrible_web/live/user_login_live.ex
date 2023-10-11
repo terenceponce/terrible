@@ -1,6 +1,7 @@
 defmodule TerribleWeb.UserLoginLive do
   use TerribleWeb, :live_view
 
+  @spec render(Phoenix.LiveView.Socket.assigns()) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-sm">
