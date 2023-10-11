@@ -45,7 +45,7 @@ defmodule Terrible.MixProject do
     [
       {:bcrypt_elixir, "~> 3.0"},
       {:credo, "1.7.0", only: [:dev, :test], runtime: false},
-      {:dialyxir, "1.4.1", only: [:dev], runtime: false},
+      {:dialyxir, "1.4.1", only: [:dev, :test], runtime: false},
       {:ecto_sql, "3.10.2"},
       {:esbuild, "0.7.1", runtime: Mix.env() == :dev},
       {:excoveralls, "0.17.1", only: :test},
