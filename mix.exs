@@ -18,6 +18,9 @@ defmodule Terrible.MixProject do
         "coveralls.html": :test
       ],
       dialyzer: [
+        plt_add_apps: [
+          :ex_unit
+        ],
         plt_file: {:no_warn, "priv/plts/project.plt"},
         list_unused_filters: true
       ]
