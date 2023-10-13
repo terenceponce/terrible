@@ -111,7 +111,8 @@
            [
              files: %{
                excluded: [
-                 ~r"/lib/terrible/application.ex"
+                 ~r"/lib/terrible/application.ex",
+                 ~r"/lib/terrible_web/live/"
                ]
              }
            ]},
