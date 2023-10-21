@@ -2,13 +2,14 @@ defmodule TerribleWeb.UserConfirmationLiveTest do
   use TerribleWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import Terrible.IdentityFixtures
+  import Terrible.Factories.IdentityFactory
 
   alias Terrible.Identity
   alias Terrible.Repo
+  alias Terrible.TestHelpers.IdentityHelper
 
   setup do
-    %{user: user_fixture()}
+    %{user: insert(:user)}
   end
 
   describe "Confirm user" do
@@ -19,7 +20,7 @@ defmodule TerribleWeb.UserConfirmationLiveTest do
 
     test "confirms the given token once", %{conn: conn, user: user} do
       token =
-        extract_user_token(fn url ->
+        IdentityHelper.extract_user_token(fn url ->
           Identity.deliver_user_confirmation_instructions(user, url)
         end)
 

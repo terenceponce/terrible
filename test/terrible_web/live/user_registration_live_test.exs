@@ -2,7 +2,9 @@ defmodule TerribleWeb.UserRegistrationLiveTest do
   use TerribleWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import Terrible.IdentityFixtures
+  import Terrible.Factories.IdentityFactory
+
+  alias Terrible.TestHelpers.DataHelper
 
   describe "Registration page" do
     test "renders registration page", %{conn: conn} do
@@ -15,7 +17,7 @@ defmodule TerribleWeb.UserRegistrationLiveTest do
     test "redirects if already logged in", %{conn: conn} do
       result =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(insert(:user))
         |> live(~p"/users/register")
         |> follow_redirect(conn, "/")
 
@@ -40,8 +42,14 @@ defmodule TerribleWeb.UserRegistrationLiveTest do
     test "creates account and logs the user in", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
-      email = unique_user_email()
-      form = form(lv, "#registration_form", user: valid_user_attributes(email: email))
+      email = DataHelper.email()
+
+      attrs = %{
+        email: email,
+        password: DataHelper.password()
+      }
+
+      form = form(lv, "#registration_form", user: attrs)
       render_submit(form)
       conn = follow_trigger_action(form, conn)
 
@@ -58,7 +66,7 @@ defmodule TerribleWeb.UserRegistrationLiveTest do
     test "renders errors for duplicated email", %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/register")
 
-      user = user_fixture(%{email: "test@email.com"})
+      user = insert(:user, email: "test@email.com")
 
       result =
         lv

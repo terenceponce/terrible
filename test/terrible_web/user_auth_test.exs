@@ -1,7 +1,7 @@
 defmodule TerribleWeb.UserAuthTest do
   use TerribleWeb.ConnCase, async: true
 
-  import Terrible.IdentityFixtures
+  import Terrible.Factories.IdentityFactory
 
   alias Phoenix.LiveView
   alias Terrible.Identity
@@ -15,7 +15,7 @@ defmodule TerribleWeb.UserAuthTest do
       |> Map.replace!(:secret_key_base, TerribleWeb.Endpoint.config(:secret_key_base))
       |> init_test_session(%{})
 
-    %{user: user_fixture(), conn: conn}
+    %{user: insert(:user), conn: conn}
   end
 
   describe "log_in_user/3" do

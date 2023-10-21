@@ -2,13 +2,13 @@ defmodule TerribleWeb.UserConfirmationInstructionsLiveTest do
   use TerribleWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import Terrible.IdentityFixtures
+  import Terrible.Factories.IdentityFactory
 
   alias Terrible.Identity
   alias Terrible.Repo
 
   setup do
-    %{user: user_fixture()}
+    %{user: insert(:user)}
   end
 
   describe "Resend confirmation" do

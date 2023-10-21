@@ -2,35 +2,39 @@ defmodule TerribleWeb.BookLiveTest do
   use TerribleWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import Terrible.BudgetingFixtures
-  import Terrible.IdentityFixtures
+  import Terrible.Factories.BudgetingFactory
+
+  alias Terrible.Factories.IdentityFactory
 
   @create_attrs %{name: "Test Book"}
   @update_attrs %{name: "Test Book Updated"}
   @invalid_attrs %{name: nil}
 
   defp create_book(_context) do
-    book = book_fixture()
-    %{book: book}
+    %{book: insert(:book)}
+  end
+
+  defp create_user(_context) do
+    %{user: IdentityFactory.insert(:user)}
   end
 
   describe "Index" do
-    setup [:create_book]
+    setup [:create_book, :create_user]
 
-    test "lists all books", %{conn: conn, book: book} do
+    test "lists all books", %{conn: conn, book: book, user: user} do
       {:ok, _index_live, html} =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(user)
         |> live(~p"/books")
 
       assert html =~ "Listing Books"
       assert html =~ book.name
     end
 
-    test "saves new book", %{conn: conn} do
+    test "saves new book", %{conn: conn, user: user} do
       {:ok, index_live, _html} =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(user)
         |> live(~p"/books")
 
       assert index_live |> element("a", "New Book") |> render_click() =~
@@ -53,10 +57,10 @@ defmodule TerribleWeb.BookLiveTest do
       assert html =~ "Test Book"
     end
 
-    test "updates book in listing", %{conn: conn, book: book} do
+    test "updates book in listing", %{conn: conn, book: book, user: user} do
       {:ok, index_live, _html} =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(user)
         |> live(~p"/books")
 
       assert index_live |> element("#books-#{book.id} a", "Edit") |> render_click() =~
@@ -79,10 +83,10 @@ defmodule TerribleWeb.BookLiveTest do
       assert html =~ "Test Book Updated"
     end
 
-    test "deletes book in listing", %{conn: conn, book: book} do
+    test "deletes book in listing", %{conn: conn, book: book, user: user} do
       {:ok, index_live, _html} =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(user)
         |> live(~p"/books")
 
       assert index_live |> element("#books-#{book.id} a", "Delete") |> render_click()
@@ -91,22 +95,22 @@ defmodule TerribleWeb.BookLiveTest do
   end
 
   describe "Show" do
-    setup [:create_book]
+    setup [:create_book, :create_user]
 
-    test "displays book", %{conn: conn, book: book} do
+    test "displays book", %{conn: conn, book: book, user: user} do
       {:ok, _show_live, html} =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(user)
         |> live(~p"/books/#{book}")
 
       assert html =~ "Show Book"
       assert html =~ book.name
     end
 
-    test "updates book within modal", %{conn: conn, book: book} do
+    test "updates book within modal", %{conn: conn, book: book, user: user} do
       {:ok, show_live, _html} =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(user)
         |> live(~p"/books/#{book}")
 
       assert show_live |> element("a", "Edit") |> render_click() =~
