@@ -6,9 +6,12 @@ defmodule Terrible.TestHelpers.DataHelper do
   require Ecto
 
   # Primitives
+
   def integer(range \\ 0..3_000), do: Enum.random(range)
   def uuid, do: Ecto.UUID.generate()
   def boolean, do: Enum.random([true, false])
+
+  # Ecto
 
   def random_value_from_ecto_enum(enum) do
     {name, _db_value} = Enum.random(enum.__enum_map__())
