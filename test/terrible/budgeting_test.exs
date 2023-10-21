@@ -1,30 +1,29 @@
 defmodule Terrible.BudgetingTest do
   use Terrible.DataCase, async: true
 
+  import Terrible.Factories.BudgetingFactory
+
   alias Terrible.Budgeting
+  alias Terrible.Budgeting.Book
 
   describe "books" do
-    alias Terrible.Budgeting.Book
-
-    import Terrible.BudgetingFixtures
-
     @invalid_attrs %{name: nil}
 
     test "list_books/0 returns all books" do
-      book = book_fixture()
+      book = insert(:book)
       assert Budgeting.list_books() == [book]
     end
 
     test "get_book!/1 returns the book with given id" do
-      book = book_fixture()
+      book = insert(:book)
       assert Budgeting.get_book!(book.id) == book
     end
 
     test "create_book/1 with valid data creates a book" do
-      valid_attrs = %{name: "some name"}
+      valid_attrs = %{name: "Test Book"}
 
       assert {:ok, %Book{} = book} = Budgeting.create_book(valid_attrs)
-      assert book.name == "some name"
+      assert book.name == "Test Book"
     end
 
     test "create_book/1 with invalid data returns error changeset" do
@@ -32,27 +31,27 @@ defmodule Terrible.BudgetingTest do
     end
 
     test "update_book/2 with valid data updates the book" do
-      book = book_fixture()
-      update_attrs = %{name: "some updated name"}
+      book = insert(:book)
+      update_attrs = %{name: "Test Book Updated"}
 
       assert {:ok, %Book{} = book} = Budgeting.update_book(book, update_attrs)
-      assert book.name == "some updated name"
+      assert book.name == "Test Book Updated"
     end
 
     test "update_book/2 with invalid data returns error changeset" do
-      book = book_fixture()
+      book = insert(:book)
       assert {:error, %Ecto.Changeset{}} = Budgeting.update_book(book, @invalid_attrs)
       assert book == Budgeting.get_book!(book.id)
     end
 
     test "delete_book/1 deletes the book" do
-      book = book_fixture()
+      book = insert(:book)
       assert {:ok, %Book{}} = Budgeting.delete_book(book)
       assert_raise Ecto.NoResultsError, fn -> Budgeting.get_book!(book.id) end
     end
 
     test "change_book/1 returns a book changeset" do
-      book = book_fixture()
+      book = insert(:book)
       assert %Ecto.Changeset{} = Budgeting.change_book(book)
     end
   end

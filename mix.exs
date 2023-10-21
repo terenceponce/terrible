@@ -52,6 +52,8 @@ defmodule Terrible.MixProject do
       {:ecto_sql, "3.10.2"},
       {:esbuild, "0.7.1", runtime: Mix.env() == :dev},
       {:excoveralls, "0.17.1", only: :test},
+      {:ex_machina, "2.7.0", only: :test},
+      {:faker, "0.17.0", only: :test},
       {:finch, "0.16.0"},
       {:floki, "0.34.3", only: :test},
       {:gettext, "0.23.1"},

@@ -2,7 +2,7 @@ defmodule TerribleWeb.UserForgotPasswordLiveTest do
   use TerribleWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import Terrible.IdentityFixtures
+  import Terrible.Factories.IdentityFactory
 
   alias Terrible.Identity
   alias Terrible.Repo
@@ -19,7 +19,7 @@ defmodule TerribleWeb.UserForgotPasswordLiveTest do
     test "redirects if already logged in", %{conn: conn} do
       result =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(insert(:user))
         |> live(~p"/users/reset_password")
         |> follow_redirect(conn, ~p"/")
 
@@ -29,7 +29,7 @@ defmodule TerribleWeb.UserForgotPasswordLiveTest do
 
   describe "Reset link" do
     setup do
-      %{user: user_fixture()}
+      %{user: insert(:user)}
     end
 
     test "sends a new reset password token", %{conn: conn, user: user} do

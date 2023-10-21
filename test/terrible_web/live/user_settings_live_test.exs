@@ -2,15 +2,17 @@ defmodule TerribleWeb.UserSettingsLiveTest do
   use TerribleWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import Terrible.IdentityFixtures
+  import Terrible.Factories.IdentityFactory
 
   alias Terrible.Identity
+  alias Terrible.TestHelpers.DataHelper
+  alias Terrible.TestHelpers.IdentityHelper
 
   describe "Settings page" do
     test "renders settings page", %{conn: conn} do
       {:ok, _lv, html} =
         conn
-        |> log_in_user(user_fixture())
+        |> log_in_user(insert(:user))
         |> live(~p"/users/settings")
 
       assert html =~ "Change Email"
@@ -28,13 +30,13 @@ defmodule TerribleWeb.UserSettingsLiveTest do
 
   describe "update email form" do
     setup %{conn: conn} do
-      password = valid_user_password()
-      user = user_fixture(%{password: password})
+      password = DataHelper.password()
+      user = insert(:user, hashed_password: Bcrypt.hash_pwd_salt(password))
       %{conn: log_in_user(conn, user), user: user, password: password}
     end
 
     test "updates the user email", %{conn: conn, password: password, user: user} do
-      new_email = unique_user_email()
+      new_email = DataHelper.email()
 
       {:ok, lv, _html} = live(conn, ~p"/users/settings")
 
@@ -85,13 +87,13 @@ defmodule TerribleWeb.UserSettingsLiveTest do
 
   describe "update password form" do
     setup %{conn: conn} do
-      password = valid_user_password()
-      user = user_fixture(%{password: password})
+      password = DataHelper.password()
+      user = insert(:user, hashed_password: Bcrypt.hash_pwd_salt(password))
       %{conn: log_in_user(conn, user), user: user, password: password}
     end
 
     test "updates the user password", %{conn: conn, user: user, password: password} do
-      new_password = valid_user_password()
+      new_password = DataHelper.password()
 
       {:ok, lv, _html} = live(conn, ~p"/users/settings")
 
@@ -161,11 +163,11 @@ defmodule TerribleWeb.UserSettingsLiveTest do
 
   describe "confirm email" do
     setup %{conn: conn} do
-      user = user_fixture()
-      email = unique_user_email()
+      user = insert(:user)
+      email = DataHelper.email()
 
       token =
-        extract_user_token(fn url ->
+        IdentityHelper.extract_user_token(fn url ->
           Identity.deliver_user_update_email_instructions(%{user | email: email}, user.email, url)
         end)
 

@@ -45,7 +45,7 @@ defmodule TerribleWeb.ConnCase do
   test context.
   """
   def register_and_log_in_user(%{conn: conn}) do
-    user = Terrible.IdentityFixtures.user_fixture()
+    user = Terrible.Factories.IdentityFactory.insert(:user)
     %{conn: log_in_user(conn, user), user: user}
   end
 

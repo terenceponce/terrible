@@ -2,15 +2,16 @@ defmodule TerribleWeb.UserResetPasswordLiveTest do
   use TerribleWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
-  import Terrible.IdentityFixtures
+  import Terrible.Factories.IdentityFactory
 
   alias Terrible.Identity
+  alias Terrible.TestHelpers.IdentityHelper
 
   setup do
-    user = user_fixture()
+    user = insert(:user)
 
     token =
-      extract_user_token(fn url ->
+      IdentityHelper.extract_user_token(fn url ->
         Identity.deliver_user_reset_password_instructions(user, url)
       end)
 
