@@ -68,7 +68,9 @@ defmodule TerribleWeb.BookLive.FormComponent do
   end
 
   defp save_book(socket, :new, book_params) do
-    case Budgeting.create_book(book_params) do
+    user = Budgeting.get_user(socket.assigns.current_user_id)
+
+    case Budgeting.create_book(user, book_params) do
       {:ok, book} ->
         notify_parent({:saved, book})
 
