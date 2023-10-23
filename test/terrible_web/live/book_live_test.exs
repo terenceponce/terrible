@@ -4,8 +4,6 @@ defmodule TerribleWeb.BookLiveTest do
   import Phoenix.LiveViewTest
   import Terrible.Factories.BudgetingFactory
 
-  alias Terrible.Factories.IdentityFactory
-
   @create_attrs %{name: "Test Book"}
   @update_attrs %{name: "Test Book Updated"}
   @invalid_attrs %{name: nil}
@@ -14,8 +12,11 @@ defmodule TerribleWeb.BookLiveTest do
     %{book: insert(:book)}
   end
 
-  defp create_user(_context) do
-    %{user: IdentityFactory.insert(:user)}
+  defp create_user(%{book: book}) do
+    user = insert(:user)
+    insert(:book_user, role: :admin, book: book, user: user)
+
+    %{user: user}
   end
 
   describe "Index" do

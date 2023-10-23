@@ -8,6 +8,9 @@ defmodule Terrible.Budgeting.Book do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Terrible.Budgeting.BookUser
+  alias Terrible.Budgeting.User
+
   @type t :: %__MODULE__{
           __meta__: Ecto.Schema.Metadata.t(),
           id: integer() | nil,
@@ -18,6 +21,9 @@ defmodule Terrible.Budgeting.Book do
 
   schema "books" do
     field :name, :string
+
+    has_many :books_users, BookUser
+    many_to_many :users, User, join_through: BookUser
 
     timestamps()
   end

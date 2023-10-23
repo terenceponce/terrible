@@ -6,7 +6,9 @@ defmodule TerribleWeb.BookLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :books, Budgeting.list_books())}
+    user = Budgeting.get_user(socket.assigns.current_user.id)
+
+    {:ok, stream(socket, :books, Budgeting.list_books(user))}
   end
 
   @impl true
