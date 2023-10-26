@@ -5,7 +5,7 @@ defmodule Terrible.Factories.IdentityFactory do
 
   use ExMachina.Ecto, repo: Terrible.Repo
 
-  alias Terrible.Identity.User
+  alias Terrible.Identity.Schemas.User
   alias Terrible.TestHelpers.DataHelper
 
   def user_factory do

@@ -1,12 +1,12 @@
-defmodule Terrible.Budgeting.User do
+defmodule Terrible.Budgeting.Schemas.User do
   @moduledoc """
   User for the Budgeting context.
   """
 
   use Ecto.Schema
 
-  alias Terrible.Budgeting.Book
-  alias Terrible.Budgeting.BookUser
+  alias Terrible.Budgeting.Schemas.Book
+  alias Terrible.Budgeting.Schemas.BookUser
 
   @type t :: %__MODULE__{
           __meta__: Ecto.Schema.Metadata.t(),

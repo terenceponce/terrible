@@ -5,9 +5,13 @@ defmodule Terrible.Identity do
 
   import Ecto.Query, warn: false
 
-  alias Terrible.Identity.User
-  alias Terrible.Identity.UserNotifier
-  alias Terrible.Identity.UserToken
+  alias Terrible.Identity.Repositories.UserRepository
+  alias Terrible.Identity.Repositories.UserTokenRepository
+  alias Terrible.Identity.Schemas.User
+  alias Terrible.Identity.Schemas.UserNotifier
+  alias Terrible.Identity.Schemas.UserToken
+  alias Terrible.Identity.Services.DeliverUserConfirmationInstructions
+  alias Terrible.Identity.Services.DeliverUserUpdateEmailInstructions
   alias Terrible.Repo
 
   ## Database getters
@@ -24,10 +28,8 @@ defmodule Terrible.Identity do
       nil
 
   """
-  @spec get_user_by_email(String.t()) :: Terrible.Identity.User.t() | nil
-  def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
-  end
+  @spec get_user_by_email(String.t()) :: User.t() | nil
+  defdelegate get_user_by_email(email), to: UserRepository, as: :get_by_email
 
   @doc """
   Gets a user by email and password.
@@ -41,12 +43,8 @@ defmodule Terrible.Identity do
       nil
 
   """
-  @spec get_user_by_email_and_password(String.t(), String.t()) :: Terrible.Identity.User.t() | nil
-  def get_user_by_email_and_password(email, password)
-      when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
-    if User.valid_password?(user, password), do: user
-  end
+  @spec get_user_by_email_and_password(String.t(), String.t()) :: User.t() | nil
+  defdelegate get_user_by_email_and_password(email, password), to: UserRepository, as: :get_by_email_and_password
 
   @doc """
   Gets a single user.
@@ -62,8 +60,8 @@ defmodule Terrible.Identity do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_user!(integer()) :: Terrible.Identity.User.t()
-  def get_user!(id), do: Repo.get!(User, id)
+  @spec get_user!(integer()) :: User.t()
+  defdelegate get_user!(id), to: UserRepository, as: :get!
 
   ## User registration
 
@@ -79,12 +77,8 @@ defmodule Terrible.Identity do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec register_user(map()) :: {:ok, Terrible.Identity.User.t()} | {:error, Ecto.Changeset.t()}
-  def register_user(attrs) do
-    %User{}
-    |> User.registration_changeset(attrs)
-    |> Repo.insert()
-  end
+  @spec register_user(map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  defdelegate register_user(attrs), to: UserRepository, as: :register
 
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking user changes.
@@ -95,10 +89,8 @@ defmodule Terrible.Identity do
       %Ecto.Changeset{data: %User{}}
 
   """
-  @spec change_user_registration(Terrible.Identity.User.t(), map() | nil) :: Ecto.Changeset.t()
-  def change_user_registration(%User{} = user, attrs \\ %{}) do
-    User.registration_changeset(user, attrs, hash_password: false, validate_email: false)
-  end
+  @spec change_user_registration(User.t(), map() | nil) :: Ecto.Changeset.t()
+  defdelegate change_user_registration(user, attrs \\ %{}), to: UserRepository, as: :change_registration
 
   ## Settings
 
@@ -111,10 +103,8 @@ defmodule Terrible.Identity do
       %Ecto.Changeset{data: %User{}}
 
   """
-  @spec change_user_email(Terrible.Identity.User.t(), map() | nil) :: Ecto.Changeset.t()
-  def change_user_email(user, attrs \\ %{}) do
-    User.email_changeset(user, attrs, validate_email: false)
-  end
+  @spec change_user_email(User.t(), map() | nil) :: Ecto.Changeset.t()
+  defdelegate change_user_email(user, attrs \\ %{}), to: UserRepository, as: :change_email
 
   @doc """
   Emulates that the email will change without actually changing
@@ -129,14 +119,9 @@ defmodule Terrible.Identity do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec apply_user_email(Terrible.Identity.User.t(), String.t(), map()) ::
-          {:ok, Terrible.Identity.User.t()} | {:error, Ecto.Changeset.t()}
-  def apply_user_email(user, password, attrs) do
-    user
-    |> User.email_changeset(attrs)
-    |> User.validate_current_password(password)
-    |> Ecto.Changeset.apply_action(:update)
-  end
+  @spec apply_user_email(Terrible.Identity.Schemas.User.t(), String.t(), map()) ::
+          {:ok, Terrible.Identity.Schemas.User.t()} | {:error, Ecto.Changeset.t()}
+  defdelegate apply_user_email(user, password, attrs), to: UserRepository, as: :apply_email
 
   @doc """
   Updates the user email using the given token.
@@ -144,32 +129,8 @@ defmodule Terrible.Identity do
   If the token matches, the user email is updated and the token is deleted.
   The confirmed_at date is also updated to the current time.
   """
-  @spec update_user_email(Terrible.Identity.User.t(), String.t()) :: :ok | :error
-  def update_user_email(user, token) do
-    context = "change:#{user.email}"
-
-    with {:ok, query} <- UserToken.verify_change_email_token_query(token, context),
-         %UserToken{sent_to: email} <- Repo.one(query),
-         {:ok, _} <-
-           user
-           |> user_email_multi(email, context)
-           |> Repo.transaction() do
-      :ok
-    else
-      _any -> :error
-    end
-  end
-
-  defp user_email_multi(user, email, context) do
-    changeset =
-      user
-      |> User.email_changeset(%{email: email})
-      |> User.confirm_changeset()
-
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, [context]))
-  end
+  @spec update_user_email(User.t(), String.t()) :: :ok | :error
+  defdelegate update_user_email(user, token), to: UserRepository, as: :update_email
 
   @doc ~S"""
   Delivers the update email instructions to the given user.
@@ -181,16 +142,13 @@ defmodule Terrible.Identity do
 
   """
   @spec deliver_user_update_email_instructions(
-          Terrible.Identity.User.t(),
+          User.t(),
           String.t(),
           (String.t() -> String.t())
-        ) :: {:ok, map()}
-  def deliver_user_update_email_instructions(%User{} = user, current_email, update_email_url_fun)
+        ) :: {:ok, Swoosh.Email.t()} | {:error, String.t()}
+  def deliver_user_update_email_instructions(user, current_email, update_email_url_fun)
       when is_function(update_email_url_fun, 1) do
-    {encoded_token, user_token} = UserToken.build_email_token(user, "change:#{current_email}")
-
-    Repo.insert!(user_token)
-    UserNotifier.deliver_update_email_instructions(user, update_email_url_fun.(encoded_token))
+    DeliverUserUpdateEmailInstructions.call(user, current_email, update_email_url_fun)
   end
 
   @doc """
@@ -202,10 +160,8 @@ defmodule Terrible.Identity do
       %Ecto.Changeset{data: %User{}}
 
   """
-  @spec change_user_password(Terrible.Identity.User.t(), map() | nil) :: Ecto.Changeset.t()
-  def change_user_password(user, attrs \\ %{}) do
-    User.password_changeset(user, attrs, hash_password: false)
-  end
+  @spec change_user_password(User.t(), map() | nil) :: Ecto.Changeset.t()
+  defdelegate change_user_password(user, attrs \\ %{}), to: UserRepository, as: :change_password
 
   @doc """
   Updates the user password.
@@ -219,56 +175,29 @@ defmodule Terrible.Identity do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_user_password(Terrible.Identity.User.t(), String.t(), map()) ::
-          {:ok, Terrible.Identity.User.t()} | {:error, Ecto.Changeset.t()}
-  def update_user_password(user, password, attrs) do
-    changeset =
-      user
-      |> User.password_changeset(attrs)
-      |> User.validate_current_password(password)
-
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _multi_name} -> {:error, changeset}
-    end
-  end
+  @spec update_user_password(User.t(), String.t(), map()) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  defdelegate update_user_password(user, password, attrs), to: UserRepository, as: :update_password
 
   ## Session
 
   @doc """
   Generates a session token.
   """
-  @spec generate_user_session_token(Terrible.Identity.User.t()) :: binary()
-  def generate_user_session_token(user) do
-    {token, user_token} = UserToken.build_session_token(user)
-    Repo.insert!(user_token)
-    token
-  end
+  @spec generate_user_session_token(User.t()) :: binary()
+  defdelegate generate_user_session_token(user), to: UserTokenRepository, as: :create_session_token
 
   @doc """
   Gets the user with the given signed token.
   """
-  @spec get_user_by_session_token(binary()) :: Terrible.Identity.User.t() | nil
-  def get_user_by_session_token(token) do
-    {:ok, query} = UserToken.verify_session_token_query(token)
-    Repo.one(query)
-  end
+  @spec get_user_by_session_token(binary()) :: User.t() | nil
+  defdelegate get_user_by_session_token(token), to: UserRepository, as: :get_by_session_token
 
   @doc """
   Deletes the signed token with the given context.
   """
   @spec delete_user_session_token(binary()) :: :ok
-  def delete_user_session_token(token) do
-    token
-    |> UserToken.token_and_context_query("session")
-    |> Repo.delete_all()
-
-    :ok
-  end
+  defdelegate delete_user_session_token(token), to: UserTokenRepository, as: :delete_session
 
   ## Confirmation
 
@@ -285,18 +214,12 @@ defmodule Terrible.Identity do
 
   """
   @spec deliver_user_confirmation_instructions(
-          Terrible.Identity.User.t(),
+          User.t(),
           (String.t() -> String.t())
-        ) :: {:ok, Swoosh.Email.t()} | {:error, :already_confirmed}
-  def deliver_user_confirmation_instructions(%User{} = user, confirmation_url_fun)
+        ) :: {:ok, Swoosh.Email.t()} | {:error, term()}
+  def deliver_user_confirmation_instructions(user, confirmation_url_fun)
       when is_function(confirmation_url_fun, 1) do
-    if user.confirmed_at do
-      {:error, :already_confirmed}
-    else
-      {encoded_token, user_token} = UserToken.build_email_token(user, "confirm")
-      Repo.insert!(user_token)
-      UserNotifier.deliver_confirmation_instructions(user, confirmation_url_fun.(encoded_token))
-    end
+    DeliverUserConfirmationInstructions.call(user, confirmation_url_fun)
   end
 
   @doc """
@@ -305,7 +228,7 @@ defmodule Terrible.Identity do
   If the token matches, the user account is marked as confirmed
   and the token is deleted.
   """
-  @spec confirm_user(binary()) :: {:ok, Terrible.Identity.User.t()} | :error
+  @spec confirm_user(binary()) :: {:ok, Terrible.Identity.Schemas.User.t()} | :error
   def confirm_user(token) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "confirm"),
          %User{} = user <- Repo.one(query),
@@ -337,7 +260,7 @@ defmodule Terrible.Identity do
 
   """
   @spec deliver_user_reset_password_instructions(
-          Terrible.Identity.User.t(),
+          Terrible.Identity.Schemas.User.t(),
           (String.t() -> String.t())
         ) :: {:ok, Swoosh.Email.t()}
   def deliver_user_reset_password_instructions(%User{} = user, reset_password_url_fun)
@@ -359,7 +282,7 @@ defmodule Terrible.Identity do
       nil
 
   """
-  @spec get_user_by_reset_password_token(binary()) :: Terrible.Identity.User.t() | nil
+  @spec get_user_by_reset_password_token(binary()) :: Terrible.Identity.Schemas.User.t() | nil
   def get_user_by_reset_password_token(token) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "reset_password"),
          %User{} = user <- Repo.one(query) do
@@ -381,8 +304,8 @@ defmodule Terrible.Identity do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec reset_user_password(Terrible.Identity.User.t(), map()) ::
-          {:ok, Terrible.Identity.User.t()} | {:error, Ecto.Changeset.t()}
+  @spec reset_user_password(Terrible.Identity.Schemas.User.t(), map()) ::
+          {:ok, Terrible.Identity.Schemas.User.t()} | {:error, Ecto.Changeset.t()}
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))

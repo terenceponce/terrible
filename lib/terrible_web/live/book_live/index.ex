@@ -2,7 +2,7 @@ defmodule TerribleWeb.BookLive.Index do
   use TerribleWeb, :live_view
 
   alias Terrible.Budgeting
-  alias Terrible.Budgeting.Book
+  alias Terrible.Budgeting.Schemas.Book
 
   @impl true
   def render(assigns) do

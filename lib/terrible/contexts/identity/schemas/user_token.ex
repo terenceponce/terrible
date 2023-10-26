@@ -1,9 +1,12 @@
-defmodule Terrible.Identity.UserToken do
+defmodule Terrible.Identity.Schemas.UserToken do
   @moduledoc false
 
   use Ecto.Schema
+
+  import Ecto.Changeset
   import Ecto.Query
-  alias Terrible.Identity.UserToken
+
+  alias Terrible.Identity.Schemas.UserToken
 
   @hash_algorithm :sha256
   @rand_size 32
@@ -29,34 +32,17 @@ defmodule Terrible.Identity.UserToken do
     field :token, :binary
     field :context, :string
     field :sent_to, :string
-    belongs_to :user, Terrible.Identity.User
+    belongs_to :user, Terrible.Identity.Schemas.User
 
     timestamps(updated_at: false)
   end
 
-  @doc """
-  Generates a token that will be stored in a signed place,
-  such as session or cookie. As they are signed, those
-  tokens do not need to be hashed.
-
-  The reason why we store session tokens in the database, even
-  though Phoenix already provides a session cookie, is because
-  Phoenix' default session cookies are not persisted, they are
-  simply signed and potentially encrypted. This means they are
-  valid indefinitely, unless you change the signing/encryption
-  salt.
-
-  Therefore, storing them allows individual user
-  sessions to be expired. The token system can also be extended
-  to store additional data, such as the device used for logging in.
-  You could then use this information to display all valid sessions
-  and devices in the UI and allow users to explicitly expire any
-  session they deem invalid.
-  """
-  @spec build_session_token(Terrible.Identity.User.t()) :: {binary(), UserToken.t()}
-  def build_session_token(user) do
-    token = :crypto.strong_rand_bytes(@rand_size)
-    {token, %UserToken{token: token, context: "session", user_id: user.id}}
+  @doc false
+  @spec changeset(t(), map()) :: Ecto.Changeset.t()
+  def changeset(user_token, attrs) do
+    user_token
+    |> cast(attrs, [:token, :context, :user_id, :sent_to])
+    |> validate_required([:token, :context, :user_id])
   end
 
   @doc """
@@ -91,7 +77,7 @@ defmodule Terrible.Identity.UserToken do
   Users can easily adapt the existing code to provide other types of delivery methods,
   for example, by phone numbers.
   """
-  @spec build_email_token(Terrible.Identity.User.t(), String.t()) :: {String.t(), t()}
+  @spec build_email_token(Terrible.Identity.Schemas.User.t(), String.t()) :: {String.t(), t()}
   def build_email_token(user, context) do
     build_hashed_token(user, context, user.email)
   end
@@ -187,12 +173,12 @@ defmodule Terrible.Identity.UserToken do
   @doc """
   Gets all tokens for the given user for the given contexts.
   """
-  @spec user_and_contexts_query(Terrible.Identity.User.t(), [atom()]) :: Ecto.Query.t()
+  @spec user_and_contexts_query(Terrible.Identity.Schemas.User.t(), [atom()]) :: Ecto.Query.t()
   def user_and_contexts_query(user, :all) do
     from t in UserToken, where: t.user_id == ^user.id
   end
 
-  @spec user_and_contexts_query(Terrible.Identity.User.t(), [atom()]) :: Ecto.Query.t()
+  @spec user_and_contexts_query(Terrible.Identity.Schemas.User.t(), [atom()]) :: Ecto.Query.t()
   def user_and_contexts_query(user, [_ | _] = contexts) do
     from t in UserToken, where: t.user_id == ^user.id and t.context in ^contexts
   end

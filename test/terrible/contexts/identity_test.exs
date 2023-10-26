@@ -4,8 +4,8 @@ defmodule Terrible.IdentityTest do
   import Terrible.Factories.IdentityFactory
 
   alias Terrible.Identity
-  alias Terrible.Identity.User
-  alias Terrible.Identity.UserToken
+  alias Terrible.Identity.Schemas.User
+  alias Terrible.Identity.Schemas.UserToken
   alias Terrible.TestHelpers.DataHelper
   alias Terrible.TestHelpers.IdentityHelper
 

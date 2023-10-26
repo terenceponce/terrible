@@ -43,7 +43,7 @@ defmodule TerribleWeb.UserForgotPasswordLiveTest do
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
 
-      assert Repo.get_by!(Identity.UserToken, user_id: user.id).context ==
+      assert Repo.get_by!(Identity.Schemas.UserToken, user_id: user.id).context ==
                "reset_password"
     end
 
@@ -57,7 +57,7 @@ defmodule TerribleWeb.UserForgotPasswordLiveTest do
         |> follow_redirect(conn, "/")
 
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
-      assert Repo.all(Identity.UserToken) == []
+      assert Repo.all(Identity.Schemas.UserToken) == []
     end
   end
 end

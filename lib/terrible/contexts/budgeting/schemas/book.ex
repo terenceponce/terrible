@@ -1,4 +1,4 @@
-defmodule Terrible.Budgeting.Book do
+defmodule Terrible.Budgeting.Schemas.Book do
   @moduledoc """
   Books represent a user's budget.
 
@@ -8,8 +8,8 @@ defmodule Terrible.Budgeting.Book do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Terrible.Budgeting.BookUser
-  alias Terrible.Budgeting.User
+  alias Terrible.Budgeting.Schemas.BookUser
+  alias Terrible.Budgeting.Schemas.User
 
   @type t :: %__MODULE__{
           __meta__: Ecto.Schema.Metadata.t(),
@@ -29,7 +29,7 @@ defmodule Terrible.Budgeting.Book do
   end
 
   @doc false
-  @spec changeset(Terrible.Budgeting.Book.t(), map()) :: Ecto.Changeset.t()
+  @spec changeset(Terrible.Budgeting.Schemas.Book.t(), map()) :: Ecto.Changeset.t()
   def changeset(book, attrs) do
     book
     |> cast(attrs, [:name])

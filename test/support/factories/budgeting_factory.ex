@@ -5,9 +5,9 @@ defmodule Terrible.Factories.BudgetingFactory do
 
   use ExMachina.Ecto, repo: Terrible.Repo
 
-  alias Terrible.Budgeting.Book
-  alias Terrible.Budgeting.BookUser
-  alias Terrible.Budgeting.User
+  alias Terrible.Budgeting.Schemas.Book
+  alias Terrible.Budgeting.Schemas.BookUser
+  alias Terrible.Budgeting.Schemas.User
   alias Terrible.TestHelpers.DataHelper
 
   def book_factory do

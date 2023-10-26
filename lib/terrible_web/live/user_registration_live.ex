@@ -2,7 +2,7 @@ defmodule TerribleWeb.UserRegistrationLive do
   use TerribleWeb, :live_view
 
   alias Terrible.Identity
-  alias Terrible.Identity.User
+  alias Terrible.Identity.Schemas.User
 
   @spec render(Phoenix.LiveView.Socket.assigns()) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do

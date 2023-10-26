@@ -29,12 +29,12 @@ defmodule TerribleWeb.UserConfirmationInstructionsLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      assert Repo.get_by!(Identity.UserToken, user_id: user.id).context == "confirm"
+      assert Repo.get_by!(Identity.Schemas.UserToken, user_id: user.id).context == "confirm"
     end
 
     test "does not send confirmation token if user is confirmed", %{conn: conn, user: user} do
       user
-      |> Identity.User.confirm_changeset()
+      |> Identity.Schemas.User.confirm_changeset()
       |> Repo.update!()
 
       {:ok, lv, _html} = live(conn, ~p"/users/confirm")
@@ -48,7 +48,7 @@ defmodule TerribleWeb.UserConfirmationInstructionsLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      refute Repo.get_by(Identity.UserToken, user_id: user.id)
+      refute Repo.get_by(Identity.Schemas.UserToken, user_id: user.id)
     end
 
     test "does not send confirmation token if email is invalid", %{conn: conn} do
@@ -63,7 +63,7 @@ defmodule TerribleWeb.UserConfirmationInstructionsLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      assert Repo.all(Identity.UserToken) == []
+      assert Repo.all(Identity.Schemas.UserToken) == []
     end
   end
 end

@@ -1,4 +1,4 @@
-defmodule Terrible.Identity.User do
+defmodule Terrible.Identity.Schemas.User do
   @moduledoc false
 
   use Ecto.Schema
@@ -154,7 +154,7 @@ defmodule Terrible.Identity.User do
   `Bcrypt.no_user_verify/0` to avoid timing attacks.
   """
   @spec valid_password?(t(), String.t()) :: boolean()
-  def valid_password?(%Terrible.Identity.User{hashed_password: hashed_password}, password)
+  def valid_password?(%Terrible.Identity.Schemas.User{hashed_password: hashed_password}, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
     Bcrypt.verify_pass(password, hashed_password)
   end
